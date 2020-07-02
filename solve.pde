@@ -145,30 +145,28 @@ class Solve {
       if (cols.get(0) != allCol[2]) {
         return false;
       }
-      
     } else if (n<=6) {
-      if(cols.get(0) != allCol[1]){
-      return false;
-      }
-      if(cols.get(1) == allCol[5]){
-        if(n==5)return true;
+      if (cols.get(0) != allCol[1]) {
         return false;
       }
-      if(n==6)return true;
+      if (cols.get(1) == allCol[5]) {
+        if (n==5)return true;
+        return false;
+      }
+      if (n==6)return true;
       return false;
-      
     } else if (n<=8) {
-      if(cols.get(0) != allCol[0]){
-      return false;
-      }
-      if(cols.get(1) == allCol[5]){
-        if(n==8)return true;
+      if (cols.get(0) != allCol[0]) {
         return false;
       }
-      if(n==7)return true;
+      if (cols.get(1) == allCol[5]) {
+        if (n==8)return true;
+        return false;
+      }
+      if (n==7)return true;
       return false;
     } else {
-      if(cols.get(0) != allCol[2]){
+      if (cols.get(0) != allCol[2]) {
         return false;
       }
     }
@@ -177,6 +175,38 @@ class Solve {
       return true;
     }
     return false;
+  }
+
+  int getEpos(int n) {
+    ArrayList<Integer> cols = getE(n);
+    int pos = -1;
+    if (cols.contains(allCol[2])) {
+      for (int i=1; i<=4; i++) {
+        if (cols.contains(allCol[round(pow(i, 3)*(8.0/3.0)-pow(i, 2)*(39.0/2.0)+i*(257.0/6.0)-25)])) {
+          return i;
+        }
+      }
+    } else if (cols.contains(allCol[3])) {
+      for (int i=1; i<=4; i++) {
+        if (cols.contains(allCol[round(pow(i, 3)*(8.0/3.0)-pow(i, 2)*(39.0/2.0)+i*(257.0/6.0)-25)])) {
+          return i+8;
+        }
+      }
+    } else {
+      if (cols.contains(allCol[0])) {
+        if (cols.contains(allCol[5])) {
+          return 8;
+        }
+        return 7;
+      } else {
+        if (cols.contains(allCol[5])) {
+          return 5;
+        }
+        return 6;
+      }
+    }
+
+    return pos;
   }
 
   int getCpos(int n) {
@@ -479,10 +509,21 @@ class Solve {
       }
     case "ml":
       {
-        for(int i=5;i<8;i++){
-        if(!chkPosE(i)) return false;
+        for (int i=5; i<=8; i++) {
+          if (!chkPosE(i)) return false;
         }
         return true;
+      }
+    case "oll":
+      {
+        empty = 0;
+        for (int i=0; i<=8; i+=2) {
+          if (faceCol[2][i] == allCol[2]) {
+            empty++;
+          }
+        }
+        empty--;
+        return empty == 4;
       }
     }
     return true;
@@ -503,6 +544,37 @@ class Solve {
       break;
     case 4: 
       alg = "LUlu"; 
+      break;
+    }
+    exeAlgo(alg);
+  }
+
+  void sLayAlgo(int pos) {
+    String alg = "";
+    switch(pos) {
+    case 5: 
+      alg = "ulULUBub";
+      break;
+    case -5:
+      alg = "uuBubulUL";
+      break;
+    case 6:
+      alg = "ubUBURur";
+      break;
+    case -6:
+      alg = "uuRurubUB";
+      break;
+    case 7:
+      alg = "urURUFuf"; 
+      break;
+    case -7:
+      alg = "UUFufurUR";
+      break;
+    case 8:
+      alg = "ufUFULul";
+      break;
+    case -8:
+      alg = "UULulufUF";
       break;
     }
     exeAlgo(alg);
@@ -657,7 +729,6 @@ class Solve {
     //cross complete
     int index[] = {0, 4, 1, 5};
     for (int n = 0; n < 4; n++) {
-      println("inside cc\t"+ n);
       if (faceCol[1][3] == allCol[index[n]] && faceCol[2][3] == allCol[3]) {
         exeAlgo("uu");
       } else if (faceCol[4][1] == allCol[index[n]] && faceCol[2][7] == allCol[3]) {
@@ -728,8 +799,115 @@ class Solve {
   }
 
   void solveML() {
-    println(checkDone("ml"));
+    while (!checkDone("ml")) {
+      int finPos = 0, currPos = 0;
+      for (int i=1; i<=4; i++) {
+        int tempPos = getEpos(i);
+        if (tempPos >4 && tempPos <9) {
+          finPos = tempPos;
+          currPos = 3-i;
+          break;
+        }
+      }
+      if (finPos == 0) {
+        for (int i=5; i<=8; i++) {
+          if (!chkPosE(i)) {
+            sLayAlgo(i);
+            break;
+          }
+        }
+        continue;
+      }
+      char mov = 'u';
+      if (currPos == -1) {
+        mov = 'U';
+        currPos = 1;
+      }
+      for (int i=0; i<currPos; i++) {
+        mov(mov);
+      }
+      int temp = 3 - (finPos - 4);
+      mov = 'U';
+
+      if (temp == -1) {
+        mov = 'u';
+        temp = 1;
+      }
+      for (int i=0; i<temp; i++) {
+        mov(mov);
+      }
+
+      ArrayList<Integer> tcol = getE(finPos-4);
+      int ti = finPos-4;
+      if (tcol.get(1) != allCol[round(pow(ti, 3)*(8.0/3.0)-pow(ti, 2)*(39.0/2.0)+ti*(257.0/6.0)-25)]) finPos = -finPos;
+      sLayAlgo(finPos);
+
+      //print("\t"+finPos);
+    }
   }
+
+  void solveCross() {
+    ArrayList<Integer> pos = new ArrayList<Integer>();
+    for (int i = 1; i<8; i+=2) {
+      if (faceCol[2][i] == allCol[2]) {
+        pos.add(i);
+      }
+    }
+    int len = pos.size();
+
+    switch (len) {
+    case 0 : 
+      exeAlgo("fruRUFuufurURF");
+      break;
+    case 2:
+      { 
+        if (pos.get(0) == 1) {
+          if (pos.get(1) == 7) {
+            exeAlgo("fruRUF");
+            return;
+          } else if (pos.get(1) == 5) {
+            mov('u');
+          }
+        } else if (pos.get(0) == 3) {
+          if (pos.get(1) == 5) {
+            exeAlgo("ufruRUF");
+            return;
+          }
+          mov('U');
+        } else {
+          exeAlgo("uu");
+        }
+        exeAlgo("furURF");  
+        break;
+      }
+    case 4 : 
+      return;
+    }
+  }
+
+  void cmpOll() {
+    while (!checkDone("oll")) {
+      if (empty == 1) {
+        while (faceCol[2][2] != allCol[2]) {
+          mov('u');
+        }
+      } else {
+        while (faceCol[5][2] != allCol[2]) {
+          mov('u');
+        }
+      }
+      exeAlgo("ruRuruuR");
+    }
+  }
+
+  void solveOll() {
+    solveCross();
+    cmpOll();
+  }
+
+  void solvePll() {
+  }
+
 
   String solveCube() {
     seq = "";
@@ -739,11 +917,17 @@ class Solve {
     solveC();
     solveBL();
     solveML();
+    solveOll();
+    solvePll();
     //exeAlgo("uufl");
     //for(int i=1;i<5;i++){
     //  println(round(pow(i,3)*(8.0/3.0)-pow(i,2)*(39.0/2.0)+i*(257.0/6.0)-25));
     //}
+
+
     return seq;
   }
 }
-//UuLuuFuuLfl
+
+//LuuFuuLfluffUUrrubblluuLUluuRUruRUruRUrluLuruRUruRUruRUruRUruRuurURUFufULulufUFulULUBubUlULUBububUBURurUbUBURurfruRUFuufurURF
+//LuuFuuLfluffUUrrubblluuLUluuRUruRUruRUrluLuruRUruRUruRUruRUruRuurURUFufULulufUFulULUBubUlULUBububUBURurUbUBURurfruRUFuufurURFuruRuruuRuuruRuruuRUruRuruuR
