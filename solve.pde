@@ -153,7 +153,8 @@ class Solve {
         if (n==5)return true;
         return false;
       }
-      if (n==6)return true;
+      if (cols.get(1) == allCol[4])
+        if (n==6)return true;
       return false;
     } else if (n<=8) {
       if (cols.get(0) != allCol[0]) {
@@ -163,7 +164,8 @@ class Solve {
         if (n==8)return true;
         return false;
       }
-      if (n==7)return true;
+      if (cols.get(1) == allCol[4])
+        if (n==7)return true;
       return false;
     } else {
       if (cols.get(0) != allCol[2]) {
@@ -777,7 +779,7 @@ class Solve {
             break;
           }
         }
-        while (!chkPosC(fpos)) sexyMov(fpos-4);
+        sexyMov(fpos-4);
         continue;
       }
 
@@ -841,8 +843,6 @@ class Solve {
       int ti = finPos-4;
       if (tcol.get(1) != allCol[round(pow(ti, 3)*(8.0/3.0)-pow(ti, 2)*(39.0/2.0)+ti*(257.0/6.0)-25)]) finPos = -finPos;
       sLayAlgo(finPos);
-
-      //print("\t"+finPos);
     }
   }
 
@@ -900,12 +900,100 @@ class Solve {
     }
   }
 
+  void headLights() {
+    int pos = 0, hpos = -1;
+    int poss[] = new int[4];
+    for (int i=1; i<=4; i++) {
+      poss[i-1] = getCpos(i);
+    }
+    for (int i=0; i<4; i++) {
+      if ((poss[i]%4)+1 == poss[(i+1)%4]) {
+        pos++;
+        if (hpos == -1) hpos = i;
+      }
+    }
+    switch(pos) {
+    case 0:
+      exeAlgo("frURUruRFruRURfrF");
+      break;
+    case 1:
+      char m = 'U';
+      if (hpos == 3) {
+        hpos = 1;
+        m = 'u';
+      }
+      for (int i=0; i<hpos; i++) {
+        mov(m);
+      }
+      exeAlgo("RfRbbrFRbbrr");
+      break;
+    case 4:
+      return;
+    }
+  }
+
+
+  void completeSolve() {
+    int[] posE, posC;
+    int chk = -1;
+    posE = new int[4];
+    posC = new int[4];
+    for (int i=0; i<4; i++) {
+      posE[i] = getEpos(i+1);
+      posC[i] = getCpos(i+1);
+      println(posE[i]+"\t"+posC[i]);
+      if (posE[i] == posC[i]) {
+        if (chk != -1) return;
+        chk = i;
+      }
+    }
+    if (chk != -1) {
+      int next = posE[(chk+1)%4];
+      int curr = posE[chk];
+
+      int temp = 2-chk;
+      char m = 'u';
+      if (temp == -1) {
+        temp = 1;
+        m = 'U';
+      }
+      for (int i=0; i<temp; i++) mov(m);
+
+      if (curr == ((next)%4)+1) {
+        exeAlgo("rrURUrururUr");
+      } else {
+        exeAlgo("RuRURURururr");
+      }
+    } else {
+      boolean h = false;
+      for (int i=0; i<4; i++) {
+        if (posC[i] == 1) {
+          if (posE[i] == 3) {
+            h = true;
+            break;
+          }
+        }
+      }
+      if (h) {
+        exeAlgo("rruuruurruurruuruurr");
+      } else {
+        if (posE[0] == posC[1]) mov('u');
+        exeAlgo("RUrruruRUrurUrUR");
+      }
+    }
+  }
+
+
   void solveOll() {
     solveCross();
     cmpOll();
   }
 
   void solvePll() {
+    headLights();
+    completeSolve();
+    //last u moves
+    while (!chkPosC(1))mov('u');
   }
 
 
@@ -919,6 +1007,10 @@ class Solve {
     solveML();
     solveOll();
     solvePll();
+
+
+
+
     //exeAlgo("uufl");
     //for(int i=1;i<5;i++){
     //  println(round(pow(i,3)*(8.0/3.0)-pow(i,2)*(39.0/2.0)+i*(257.0/6.0)-25));

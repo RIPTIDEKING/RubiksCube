@@ -28,6 +28,9 @@ void keyPressed() {
   } else if (key == 'B') {
     r.rotB(-1);
   } else if (key == ' ') {
+    seqMoves = scramble(30);
+    println(seqMoves);
+    //animSpeed = 90;
     startSeq = true;
     index = 0;
   } else if (key == 's') {
@@ -35,7 +38,7 @@ void keyPressed() {
     seqMoves = slv.solveCube();
     startSeq = true;
     index = 0;
-    animSpeed = 3;
+    animSpeed = 5;
     println("\n"+ seqMoves);
     println("finished solve");
   }
@@ -67,4 +70,14 @@ void moves(char seq) {
   } else if (seq == 'B') {
     r.rotB(-1);
   }
+}
+
+String scramble(int n){
+  String ret = "";
+  String moves = "fbrlud";
+  int len = moves.length();
+  for(int i=0;i<n;i++){
+    ret += moves.charAt(int(random(len)));
+  }
+  return ret;
 }

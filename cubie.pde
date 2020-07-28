@@ -1,5 +1,5 @@
 
-int animSpeed = 90;
+int animSpeed = 10;
 class Cubie {
 
 
